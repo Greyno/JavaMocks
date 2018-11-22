@@ -23,6 +23,8 @@ public class VetSDJpaServiceTest {
     @Test
     void testDeleteById(){
         vetSDJpaService.deleteById(1L);
+
+        //verify that the mock behaviour happened (once)
         verify(vetRepository, times(1)).deleteById(1L);
     }
 
