@@ -7,21 +7,24 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import repositories.SpecialityRepository;
 import services.springdatajpa.SpecialtySDJpaService;
 
+import java.util.Optional;
+
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockitoExtension.class) //Will get null in test results otherwise
 public class SpecialtySDJpaServiceTest {
 
     //Method 3 to create a mock: Use injection
 
     //We want to test SpecialtySDJpaService
+    //Since SpecialtySDJpaService uses a SpecialityRepository, we can tell Mockito to create a mock of
+    //SpecialityRepository
     @Mock
     SpecialityRepository specialtyRepository;
 
-    //Since SpecialtySDJpaService uses a SpecialityRepository, we can tell Mockito to create an instance
-    // of SpecialtySDJpaService and inject a mock of SpecialityRepository into it
-
-    //Create an instance of the Speciality service with the mock class injected into it
+    //Now we can tell Mockito to create an instance of SpecialtySDJpaService and inject a mock of
+    // SpecialityRepository into it
+    //Create an instance of the SpecialitySDJpService and inject the mock class into it
     @InjectMocks
     SpecialtySDJpaService service;
 
@@ -60,5 +63,33 @@ public class SpecialtySDJpaServiceTest {
     @Test
     void testDelete() {
         service.delete(new Speciality());
+    }
+
+    //Returning data from mocks
+    @Test
+    void findByIdTest() {
+        //Since findById returns a Speciality, create an object our mock will return
+        Speciality speciality = new Speciality();
+
+        //Mock the response from the Speciality object when the findById method is called
+        when(specialtyRepository.findById(1L)).thenReturn(Optional.of(speciality));
+
+        //Make the method call under the class that is being tested (i.e. SpecialitySDJpaService) (invoke the service)
+        Speciality foundSpeciality = service.findById(1L);
+        assert(foundSpeciality.equals(speciality));
+        //assertThat(foundSpeciality).isNotNull();
+
+        //use Argument Matchers to verify any Long value entered
+        verify(specialtyRepository).findById(anyLong()); //verify mock implementation was called
+    }
+
+    @Test
+    void testDeleteByObject(){
+        Speciality speciality = new Speciality();
+        service.delete(speciality);
+
+        //verify that the delete method is called with any Speciality object
+        verify(specialtyRepository).delete(any(Speciality.class));
+
     }
 }
